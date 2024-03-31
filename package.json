@@ -8,18 +8,28 @@
     "start": "tsc && node ./output/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["telebot", "telegraf", "bot", "telegram bot", "bot telegram"],
+  "keywords": [
+    "telebot",
+    "telegraf",
+    "bot",
+    "telegram bot",
+    "bot telegram"
+  ],
   "author": "Farhannnn",
   "license": "ISC",
   "dependencies": {
+    "archiver": "^7.0.1",
     "axios": "^1.6.8",
     "chalk": "^5.3.0",
+    "file-type": "^19.0.0",
+    "form-data": "^4.0.0",
     "lodash": "^4.17.21",
     "moment-timezone": "^0.5.45",
     "telegraf": "^4.16.3"
   },
   "devDependencies": {
+    "@types/archiver": "^6.0.2",
     "@types/lodash": "^4.17.0",
-    "@types/node": "^20.11.30"
+    "@types/node": "^20.12.2"
   }
 }

@@ -1,10 +1,25 @@
 {
   "compilerOptions": {
     "target": "ES2021",
-    "module": "NodeNext",
+    "module": "NodeNext", /* Ubah module menjadi ESNext atau modul ESM lainnya */
+    "moduleResolution": "NodeNext",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
     "strict": true,
     "outDir": "./output"
   },
-  "exclude": ["node_modules"]
+  "files": ["types/global.d.ts"],
+  "include": [
+    "*.ts",
+    "callback/**/*.ts",
+    "command/**/*.ts",
+    "configs/**/*.ts",
+    "database/**/*.json",
+    "library/**/*.ts",
+    "types/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
