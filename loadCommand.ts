@@ -1,9 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 
-import * as functions from './library/functions.js';
+import { requireJson, reloadModule } from './library/functions.js';
+import { savedPlugins } from './library/service.js';
 
-export default async (cache: any) => {
+export default async (cache: { headersCommands: any; allCommands?: any; plugins?: any; Commands?: { [x: string]: string | any[]; }; commander?: { [x: string]: string | any[]; }; }) => {
    const commandsPath = './output/command';
    const plugins = fs.readdirSync(commandsPath);
    for (const plugin of plugins) {
@@ -13,9 +14,9 @@ export default async (cache: any) => {
             const pathFiles = path.join(commandsPath, plugin, filename);
             try {
                const command = (await import(`./${pathFiles.replace('output', '').slice(1)}`)).default;
-               const allCommand = functions.requireJson('./output/database/allCommands.json');
+               const allCommand = requireJson('./output/database/allCommands.json');
                if (command) {
-                  cache.headersCommands.push({ category: plugin, command: command.show });
+                  cache.headersCommands.push({ category: plugin, command: command.show.map((item: string) => `${item} ${command.description}`) });
                   if (allCommand.length < 1) {
                      cache.allCommands.push(command.show[0].split(' ')[0]);
                   } else {
@@ -26,11 +27,11 @@ export default async (cache: any) => {
                }
             } catch (error: any) {
                console.error(error);
-               functions.reloadModule(pathFiles);
+               reloadModule(pathFiles);
             }
          }
       }
    }
    fs.writeFileSync('./output/database/allCommands.json', JSON.stringify(cache.allCommands, null, 2));
-   functions.savedPlugins(cache);
+   savedPlugins({ commander: cache.commander, Commands: cache.Commands, headersCommands: cache.headersCommands });
 };

@@ -24,15 +24,33 @@ yarn add --save-dev typescript && yarn install && yarn run start
 
 ```bash
 └── telegram-bot-ts
+    └── 📁callback
+        └── inputText.ts
+    └── 📁command
+        └── 📁Downloader
+            └── instagram.ts
+            └── tiktok.ts
+        └── 📁Maker
+            └── removebg.ts
     └── 📁configs
         └── env.ts
+        └── regex.ts
     └── 📁database
+        └── allCommands.json
         └── commands.json
-    └── index.ts
     └── 📁library
+        └── client.ts
         └── functions.ts
         └── service.ts
+    └── 📁types
+        └── global.d.ts
+        └── index.ts
+    └── .gitignore
+    └── index.ts
+    └── loadCommand.ts
+    └── markdownlint.config
     └── package.json
+    └── README.md
     └── tsconfig.json
 ```
 

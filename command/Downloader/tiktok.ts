@@ -4,23 +4,24 @@ import { execSync } from 'child_process';
 import { Context } from 'telegraf';
 
 import { media } from '../../configs/regex.js';
-import { convertToBuffer, zipFolder, sendDocument } from '../../library/functions.js';
+import { convertToBuffer, zipFolder, sendDocument, sendVideo } from '../../library/functions.js';
+import { Client } from '../../types/index.js';
 
 export default {
-   show: ['tiktok < url >'],
+   show: ['tiktok'],
    command: /^(ttdl|tiktok|tt)$/i,
    description: 'Download media from Tiktok Url',
    query: true,
    url: true,
    usage: '%cmd% url tiktok.',
-   execute: async ({ query, baseURL, apikey, id, app, xcoders }: { query: string, baseURL: string, apikey: string, id: string, app: Context, xcoders: Context }) => {
+   execute: async ({ query, id, xcoders, m }: { query: string, id: number, xcoders: Context, m: Client }) => {
       try {
          if (!query) return xcoders.reply('Masukkan url tiktok');
          if (!media(query)) return xcoders.reply('invalid url tiktok, masukkan url dengan benar...');
-         const response = await fetch(`${baseURL}/api/download/tiktok?url=${query}&apikey=${apikey}`).then((response) => response.json());
-         await xcoders.reply('Tunggu sebentar...');
+         const response = await fetch(`${m.base_url}/api/download/tiktok?url=${query}&apikey=${m.api_key}`).then((response) => response.json());
+         if (response.status) await xcoders.reply('Tunggu sebentar...');
          if (response.result.type === 'video') {
-            await app.telegram.sendVideo(id, response.result.url, { has_spoiler: true });
+            return sendVideo(id, response.result.url[0], { caption: response.result.caption, has_spoiler: true });
          } else {
             const pathFolder = path.join(process.cwd(), `Tiktok_result_${Date.now()}`);
             const pathZip = path.join(process.cwd(), `Tiktok Result @${xcoders.from?.username}.zip`);
@@ -48,7 +49,7 @@ export default {
          }
       } catch (error: any) {
          console.error(error);
-         throw 'Error download media tiktok, silahkan lapor ke owner untuk memperbaiki fitur tersebut...';
+         return xcoders.reply('Error download media tiktok, silahkan lapor ke owner untuk memperbaiki fitur tersebut...');
       }
    }
 };

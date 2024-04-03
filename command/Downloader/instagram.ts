@@ -5,23 +5,24 @@ import { execSync } from 'child_process';
 import { Context } from 'telegraf';
 
 import { media } from '../../configs/regex.js';
-import { convertToBuffer, zipFolder, sendDocument } from '../../library/functions.js';
+import { convertToBuffer, zipFolder, sendDocument, sendVideo } from '../../library/functions.js';
+import { Client } from '../../types/index.js';
 
 export default {
-   show: ['ig < url >'],
+   show: ['ig'],
    command: /^(ig|igdl|instagram)$/i,
    description: 'Download media from Instagram Url',
    query: true,
    url: true,
    usage: '%cmd% url Instagram.',
-   execute: async ({ query, baseURL, apikey, id, app, xcoders }: { query: string, baseURL: string, apikey: string, id: string, username: string, app: Context, xcoders: Context }) => {
+   execute: async ({ query, xcoders, m }: { query: string, username: string, xcoders: Context, m: Client }) => {
       try {
          if (!query) return xcoders.reply('Masukkan url tiktok');
          if (!media(query)) return xcoders.reply('invalid url tiktok, masukkan url dengan benar...');
-         const response = await fetch(`${baseURL}/api/download/instagram?url=${query}&apikey=${apikey}`).then((response) => response.json());
+         const response = await fetch(`${m.base_url}/api/download/instagram?url=${query}&apikey=${m.api_key}`).then((response) => response.json());
          await xcoders.reply('Tunggu sebentar...');
          if (typeof response.result!.url === 'string') {
-            await app.telegram.sendVideo(id, response.result.url, { has_spoiler: true });
+            return sendVideo(m.id, response.result.url, { caption: 'Successfully', has_spoiler: true });
          } else {
             const pathFolder = path.join(process.cwd(), `instagram_result_${Date.now()}`);
             const pathZip = path.join(process.cwd(), `Instagram Result @${xcoders.from?.username}.zip`);
@@ -42,12 +43,12 @@ export default {
             await zipFolder(pathFolder, pathZip, async (error: string | null, message: string) => {
                if (error) await xcoders.reply(error);
                execSync(`rm -rf "${pathFolder}"`);
-               if (fs.existsSync(pathZip)) return sendDocument(id, pathZip, `Insatagram Result @${xcoders.from?.username}.zip`);
+               if (fs.existsSync(pathZip)) return sendDocument(m.id, pathZip, `Insatagram Result @${xcoders.from?.username}.zip`);
             });
          }
       } catch (error: any) {
          console.error(error);
-         throw 'Error download media instagram, silahkan lapor ke owner untuk memperbaiki fitur tersebut...';
+         return xcoders.reply('Error download media instagram, silahkan lapor ke owner untuk memperbaiki fitur tersebut...');
       }
    }
 };

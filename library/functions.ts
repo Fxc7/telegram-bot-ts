@@ -2,10 +2,9 @@ import fs from 'fs';
 import path from 'path';
 import Module from 'module';
 import axios from 'axios';
-import chalk from 'chalk';
 import archiver from 'archiver';
 
-import { fileTypeFromFile } from 'file-type';
+import { fileTypeFromBuffer } from 'file-type';
 import FormData from 'form-data';
 
 import { token } from '../configs/env.js';
@@ -23,37 +22,6 @@ export const reloadModule = (modulePath: string): void => {
    delete require.cache[fullPath];
 };
 
-export const savedPlugins = (cache: { headersCommands: any; Commands: { [x: string]: string | any[]; }; commander: { [x: string]: string | any[]; }; }): void => {
-   const headers = cache.headersCommands;
-   const objects = headers.reduce((objects: { [x: string]: any; }, items: { category: string | number; command: any; }) => {
-      if (objects[items.category]) {
-         objects[items.category].command.push(...items.command);
-      } else {
-         objects[items.category] = { ...items };
-      }
-      return objects;
-   }, {});
-   Object.keys(objects).forEach((category) => {
-      cache.Commands[category] = [...new Set(objects[category].command)].sort();
-   });
-   const keysCommander = Object.keys(cache.commander);
-   const keysCommands = Object.keys(cache.Commands);
-   if (keysCommander.length === 0 && keysCommands.length !== 0) {
-      fs.writeFileSync('./output/database/commands.json', JSON.stringify(cache.Commands, null, 2));
-      console.log(chalk.green.bold.overline('Successfully loaded plugins'));
-   } else if (keysCommands.length === keysCommander.length) {
-      keysCommander.forEach((key) => {
-         if (cache.commander[key].length !== cache.Commands[key].length) {
-            fs.writeFileSync('./output/database/commands.json', JSON.stringify(cache.Commands, null, 2));
-            console.log(chalk.green.bold.overline('Successfully added plugins'));
-         }
-      });
-   } else if (keysCommands.length !== (keysCommander.length || keysCommander.length === 0)) {
-      fs.writeFileSync('./output/database/commands.json', JSON.stringify(cache.Commands, null, 2));
-      console.log(chalk.green.bold.overline('Successfully updated plugins'));
-   }
-};
-
 export const checkContentType = async (url: string, type: string): Promise<boolean> => {
    try {
       const response = await axios.head(url);
@@ -69,20 +37,63 @@ export const checkContentType = async (url: string, type: string): Promise<boole
    }
 };
 
-export const sendDocument = async (id: string, filePath: string, filename: string): Promise<void> => {
+export const getJson = async (url: string): Promise<void> => {
    try {
-      const readFiles = await fs.promises.readFile(filePath);
-      const files = await fileTypeFromFile(filePath);
+      const response = await axios.get(url, {
+         headers: {
+            'Content-Type': 'application/json'
+         }
+      });
+      return response.data;
+   } catch (error) {
+      throw error;
+   }
+};
+
+export const getBuffer = async (url: string): Promise<Buffer> => {
+   try {
+      const response = await fetch(url).then((response) => response.arrayBuffer());
+      return convertToBuffer(response);
+   } catch (error) {
+      throw error;
+   }
+}
+
+export const sendVideo = async (id: number, input: string, options: { [key: string]: string | boolean | object | [] } = {}): Promise<void> => {
+   try {
+      const readFiles = input.startsWith('http') ? await getBuffer(input) : await fs.promises.readFile(input);
+      const files = await fileTypeFromBuffer(readFiles);
       const formData = new FormData();
       formData.append('chat_id', id);
-      formData.append('document', readFiles, { contentType: files?.mime, filename: filename, filepath: filePath });
+      for (let keys of Object.keys(options)) formData.append(keys, options[keys].toString());
+      formData.append('video', readFiles, { contentType: files?.mime, filename: `${crypto.randomUUID()}.mp4` });
+      const response = await axios.post(`https://api.telegram.org/bot${token}/sendVideo`, formData, {
+         headers: {
+            ...formData.getHeaders()
+         }
+      });
+      if (fs.existsSync(input)) await fs.promises.unlink(input);
+      return response.data.ok;
+   } catch (error) {
+      throw error;
+   }
+};
+
+export const sendDocument = async (id: number, filePath: string, filename: string, options: { [key: string]: string | boolean | object | [] } = {}): Promise<void> => {
+   try {
+      const readFiles = filePath.startsWith('http') ? await getBuffer(filePath) : await fs.promises.readFile(filePath);
+      const files = await fileTypeFromBuffer(readFiles);
+      const formData = new FormData();
+      formData.append('chat_id', id);
+      for (let keys of Object.keys(options)) formData.append(keys, options[keys].toString());
+      formData.append('document', readFiles, { contentType: files?.mime, filename: filename });
       const response = await axios.post(`https://api.telegram.org/bot${token}/sendDocument`, formData, {
          headers: {
-            'Content-Type': `multipart/form-data; boundary=${formData.getBoundary()}`
+            ...formData.getHeaders()
          }
       });
       if (fs.existsSync(filePath)) await fs.promises.unlink(filePath);
-      return response.data;
+      return response.data.ok;
    } catch (error) {
       throw error;
    }
