@@ -31,7 +31,14 @@ yarn add --save-dev typescript && yarn install && yarn run start
             └── instagram.ts
             └── tiktok.ts
         └── 📁Maker
+            └── affect.ts
+            └── biden.ts
+            └── caution.ts
+            └── drake.ts
+            └── funfacts.ts
+            └── kannagen.ts
             └── removebg.ts
+            └── rip.ts
     └── 📁configs
         └── env.ts
         └── regex.ts

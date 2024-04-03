@@ -9,7 +9,7 @@ import { session } from 'telegraf/session';
 import client from './library/client.js';
 import loadCommand from './loadCommand.js';
 import { inputTextCallbackQuery } from './callback/inputText.js';
-import { baseURL, owner, token, prefix } from './configs/env.js';
+import { baseURL, owner, token, prefix, trakteerURL } from './configs/env.js';
 import { url } from './configs/regex.js';
 import { checkContentType } from './library/functions.js';
 import { serviceMenu } from './library/service.js';
@@ -26,7 +26,8 @@ const app = new Telegraf(token, { handlerTimeout: Infinity });
 
 const keyboard = Markup.inlineKeyboard([
    Markup.button.url('Rest API', baseURL),
-   Markup.button.url('Owner Bot', `https://t.me/${owner[0]}`)
+   Markup.button.url('Owner Bot', `https://t.me/${owner[0]}`),
+   Markup.button.url('Trakteer ID', trakteerURL)
 ]);
 
 const styleMessage = (title: string, text: string, step = null) => {

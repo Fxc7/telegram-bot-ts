@@ -37,7 +37,7 @@ export const checkContentType = async (url: string, type: string): Promise<boole
    }
 };
 
-export const getJson = async (url: string): Promise<void> => {
+export const getJson = async (url: string) => {
    try {
       const response = await axios.get(url, {
          headers: {
@@ -59,9 +59,9 @@ export const getBuffer = async (url: string): Promise<Buffer> => {
    }
 }
 
-export const sendVideo = async (id: number, input: string, options: { [key: string]: string | boolean | object | [] } = {}): Promise<void> => {
+export const sendVideo = async (id: number, input: string | Buffer, options: { [key: string]: string | boolean | object | [] } = {}): Promise<void> => {
    try {
-      const readFiles = input.startsWith('http') ? await getBuffer(input) : await fs.promises.readFile(input);
+      const readFiles = Buffer.isBuffer(input) ? input : input.startsWith('http') ? await getBuffer(input) : await fs.promises.readFile(input);
       const files = await fileTypeFromBuffer(readFiles);
       const formData = new FormData();
       formData.append('chat_id', id);
