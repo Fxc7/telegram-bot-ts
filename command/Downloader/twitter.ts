@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { fileTypeFromBuffer } from 'file-type';
 import { execSync } from 'child_process';
 import { Context } from 'telegraf';
 
@@ -10,31 +9,30 @@ import { zipFolder, sendDocument, getBuffer, getJson } from '../../library/funct
 import { Client } from '../../types/index.js';
 
 export default {
-   show: ['ig'],
-   command: /^(ig|igdl|instagram)$/i,
-   description: 'Download media from Instagram Url',
+   show: ['twitter'],
+   command: /^(twit|twitdl|twitter)$/i,
+   description: 'Download media from Twitter Url',
    query: true,
    url: true,
-   usage: '%cmd% url Instagram.',
+   usage: '%cmd% url Twitter.',
    execute: async ({ query, xcoders, m }: { query: string, username: string, xcoders: Context, m: Client }) => {
       try {
-         if (!media(query)) return xcoders.reply('invalid url Instagram, masukkan url dengan benar...');
-         const response = await getJson(`${m.base_url}/api/download/instagram?url=${query}&apikey=${m.api_key}`);
+         if (!media(query)) return xcoders.reply('invalid url Twitter, masukkan url dengan benar...');
+         const response = await getJson(`${m.base_url}/api/download/twitter?url=${query}&apikey=${m.api_key}`);
          await xcoders.reply('Tunggu sebentar...');
-         if (typeof response.result!.url === 'string') {
-            const buffer = await getBuffer(response.result.url);
-            const type = await fileTypeFromBuffer(buffer);
-            if (/video/.test(type?.mime!)) return xcoders.sendVideo({ source: buffer }, { caption: 'Successfully download video', has_spoiler: true });
-            return xcoders.sendPhoto({ source: buffer }, { caption: 'Successfully download Photo', has_spoiler: true });
+         if (response.result.data.length === 1) {
+            const buffer = await getBuffer(response.result.data[0].url);
+            if (/video/.test(response.result.data[0].type)) return xcoders.sendVideo({ source: buffer }, { caption: response.result.caption, has_spoiler: true });
+            return xcoders.sendPhoto({ source: buffer }, { caption: response.result.caption, has_spoiler: true });
          } else {
-            const pathFolder = path.join(process.cwd(), `instagram_result_${Date.now()}`);
-            const pathZip = path.join(process.cwd(), `Instagram Result @${xcoders.from?.username}.zip`);
+            const pathFolder = path.join(process.cwd(), `twitter_result_${Date.now()}`);
+            const pathZip = path.join(process.cwd(), `Twitter Result @${xcoders.from?.username}.zip`);
 
             if (!fs.existsSync(pathFolder)) fs.mkdirSync(pathFolder);
             if (!fs.existsSync(path.join(pathFolder, 'photos'))) fs.mkdirSync(path.join(pathFolder, 'photos'));
             if (!fs.existsSync(path.join(pathFolder, 'videos'))) fs.mkdirSync(path.join(pathFolder, 'videos'));
 
-            for (let { type, url } of response.result) {
+            for (let { type, url } of response.result.data) {
                const buffer = await getBuffer(url);
                if (type === 'photo') {
                   await fs.promises.writeFile(path.join(pathFolder, 'photos', `${crypto.randomUUID()}.jpeg`), buffer);
@@ -45,12 +43,12 @@ export default {
             await zipFolder(pathFolder, pathZip, async (error: string | null, message: string) => {
                if (error) await xcoders.reply(error);
                execSync(`rm -rf "${pathFolder}"`);
-               if (fs.existsSync(pathZip)) return sendDocument(m.id, pathZip, `Insatagram Result @${xcoders.from?.username}.zip`);
+               if (fs.existsSync(pathZip)) return sendDocument(m.id, pathZip, `Twitter Result @${xcoders.from?.username}.zip`);
             });
          }
       } catch (error: any) {
          console.error(error);
-         return xcoders.reply('Error download media instagram, silahkan lapor ke owner untuk memperbaiki fitur tersebut...');
+         return xcoders.reply('Error download media twitter, silahkan lapor ke owner untuk memperbaiki fitur tersebut...');
       }
    }
 };

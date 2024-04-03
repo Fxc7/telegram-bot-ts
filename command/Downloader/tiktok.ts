@@ -16,7 +16,6 @@ export default {
    usage: '%cmd% url tiktok.',
    execute: async ({ query, xcoders, m }: { query: string, xcoders: Context, m: Client }) => {
       try {
-         if (!query) return xcoders.reply('Masukkan url tiktok');
          if (!media(query)) return xcoders.reply('invalid url tiktok, masukkan url dengan benar...');
          const response = await fetch(`${m.base_url}/api/download/tiktok?url=${query}&apikey=${m.api_key}`).then((response) => response.json());
          if (response.status) await xcoders.reply('Tunggu sebentar...');
@@ -35,8 +34,8 @@ export default {
                await fs.promises.writeFile(path.join(pathFolder, 'music', `${response.result.audio_name}.mp3`), buffer);
             }
 
-            for (let url of response.result.url) {
-               const buffer = await getBuffer(url);
+            for (let image of response.result.url) {
+               const buffer = await getBuffer(image);
                await fs.promises.writeFile(path.join(pathFolder, 'photos', `${crypto.randomUUID()}.jpeg`), buffer);
             }
             await zipFolder(pathFolder, pathZip, async (error: string | null, message: string) => {
