@@ -53,7 +53,7 @@ app.on('message', async (xcoders) => {
 
       if (isCommand) {
          if (m.is_bot) return;
-         console.log(chalk.bgBlack.red.italic.bold(getCurrentTime), chalk.bold.italic.green('[ CMD ]'), chalk.italic.greenBright.bold('From'), chalk.bold.italic.yellow(m.username), m.type !== 'private' ? chalk.italic.bold.greenBright('in ') + chalk.italic.bold.yellow(xcoders.message.from.first_name) : '');
+         console.log(chalk.bgBlack.red.italic.bold(getCurrentTime), chalk.bold.italic.green('[ CMD ]'), chalk.italic.red(command), chalk.italic.greenBright.bold('From'), chalk.bold.italic.yellow(m.username), m.type !== 'private' ? chalk.italic.bold.greenBright('in ') + chalk.italic.bold.yellow(xcoders.message.from.first_name) : '');
       }
       if (!isCommand) {
          console.log(chalk.bgBlack.italic.red.bold(getCurrentTime), chalk.italic.red('[ MSG ]'), chalk.bold.italic.greenBright('From'), chalk.italic.bold.yellow(m.username), m.type !== 'private' ? chalk.italic.bold.greenBright('in ') + chalk.italic.bold.yellow(xcoders.message.from.first_name) : '');

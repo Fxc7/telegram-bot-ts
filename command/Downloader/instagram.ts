@@ -6,7 +6,7 @@ import { execSync } from 'child_process';
 import { Context } from 'telegraf';
 
 import { media } from '../../configs/regex.js';
-import { zipFolder, sendDocument, getBuffer, getJson } from '../../library/functions.js';
+import { zipFolder, getBuffer, getJson } from '../../library/functions.js';
 import { Client } from '../../types/index.js';
 
 export default {
@@ -45,7 +45,11 @@ export default {
             await zipFolder(pathFolder, pathZip, async (error: string | null, message: string) => {
                if (error) await xcoders.reply(error);
                execSync(`rm -rf "${pathFolder}"`);
-               if (fs.existsSync(pathZip)) return sendDocument(m.id, pathZip, `Insatagram Result @${xcoders.from?.username}.zip`);
+               if (fs.existsSync(pathZip)) {
+                  const buffer = await fs.promises.readFile(pathZip);
+                  await fs.promises.unlink(pathZip);
+                  return xcoders.sendDocument({ source: buffer, filename: `Instagram Result @${xcoders.from?.username}.zip` }, { caption: message }).catch((error) => error);
+               }
             });
          }
       } catch (error: any) {

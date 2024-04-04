@@ -4,7 +4,7 @@ import { execSync } from 'child_process';
 import { Context } from 'telegraf';
 
 import { media } from '../../configs/regex.js';
-import { zipFolder, sendDocument, getBuffer } from '../../library/functions.js';
+import { zipFolder, getBuffer } from '../../library/functions.js';
 import { Client } from '../../types/index.js';
 
 export default {
@@ -20,7 +20,7 @@ export default {
          const response = await fetch(`${m.base_url}/api/download/tiktok?url=${query}&apikey=${m.api_key}`).then((response) => response.json());
          if (response.status) await xcoders.reply('Tunggu sebentar...');
          if (response.result.type === 'video') {
-            return xcoders.sendVideo({ url: response.result.url[0] }, { caption: response.result.caption, has_spoiler: true });
+            return xcoders.sendVideo({ source: await getBuffer(response.result.url[0]) }, { caption: response.result.caption, has_spoiler: true });
          } else {
             const pathFolder = path.join(process.cwd(), `Tiktok_result_${Date.now()}`);
             const pathZip = path.join(process.cwd(), `Tiktok Result @${xcoders.from?.username}.zip`);
@@ -41,7 +41,11 @@ export default {
             await zipFolder(pathFolder, pathZip, async (error: string | null, message: string) => {
                if (error) await xcoders.reply(error);
                execSync(`rm -rf "${pathFolder}"`);
-               if (fs.existsSync(pathZip)) return sendDocument(m.id, pathZip, `Tiktok Result @${xcoders.from?.username}.zip`);
+               if (fs.existsSync(pathZip)) {
+                  const buffer = await fs.promises.readFile(pathZip);
+                  await fs.promises.unlink(pathZip);
+                  return xcoders.sendDocument({ source: buffer, filename: `Tiktok Result @${xcoders.from?.username}.zip` }, { caption: message }).catch((error) => error);
+               }
             });
          }
       } catch (error: any) {
