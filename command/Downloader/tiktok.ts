@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
 import { Context } from 'telegraf';
+import { Update } from 'telegraf/types';
 
 import { media } from '../../configs/regex.js';
 import { zipFolder, getBuffer } from '../../library/functions.js';
@@ -14,7 +15,7 @@ export default {
    query: true,
    url: true,
    usage: '%cmd% url tiktok.',
-   execute: async ({ query, xcoders, m }: { query: string, xcoders: Context, m: Client }) => {
+   execute: async ({ query, xcoders, m, errorMessage }: { query: string, xcoders: Context, m: Client, errorMessage: (xcoders: Context<Update>, message: string, error: any) => Promise<void> }) => {
       try {
          if (!media(query)) return xcoders.reply('invalid url tiktok, masukkan url dengan benar...');
          const response = await fetch(`${m.base_url}/api/download/tiktok?url=${query}&apikey=${m.api_key}`).then((response) => response.json());
@@ -49,8 +50,7 @@ export default {
             });
          }
       } catch (error: any) {
-         console.error(error);
-         return xcoders.reply('Error download media tiktok, silahkan lapor ke owner untuk memperbaiki fitur tersebut...');
+         return errorMessage(xcoders, 'Error download media tiktok, silahkan lapor ke owner untuk memperbaiki fitur tersebut...', error);
       }
    }
 };

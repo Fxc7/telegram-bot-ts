@@ -28,8 +28,13 @@ yarn add --save-dev typescript && yarn install && yarn run start
         └── inputText.ts
     └── 📁command
         └── 📁Downloader
+            └── capcut.ts
+            └── facebook.ts
             └── instagram.ts
+            └── threads.ts
             └── tiktok.ts
+            └── twitter.ts
+            └── youtube-short.ts
         └── 📁Maker
             └── affect.ts
             └── biden.ts
@@ -39,6 +44,7 @@ yarn add --save-dev typescript && yarn install && yarn run start
             └── kannagen.ts
             └── removebg.ts
             └── rip.ts
+            └── upscale.ts
     └── 📁configs
         └── env.ts
         └── regex.ts
@@ -52,13 +58,13 @@ yarn add --save-dev typescript && yarn install && yarn run start
     └── 📁types
         └── global.d.ts
         └── index.ts
+    └── tsconfig.json
     └── .gitignore
     └── index.ts
     └── loadCommand.ts
     └── markdownlint.config
     └── package.json
     └── README.md
-    └── tsconfig.json
 ```
 
 ## Authors

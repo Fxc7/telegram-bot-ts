@@ -1,19 +1,38 @@
+import { Markup, Context } from 'telegraf';
 import _ from 'lodash';
 import moment from 'moment-timezone';
 import chalk from 'chalk';
 import fs from 'fs';
 
 import { requireJson } from './functions.js';
+import { baseURL, owner, trakteerURL } from '../configs/env.js';
 
 const style = '⭑';
 const randomSplit = _.sample(['/', 'or']);
+const monospace = (str: string) => '```' + str + '```';
+const interline = (str: string) => '_' + str + '_';
+const bold = (str: string) => '*' + str + '*';
+
+export const keyboardMessage = Markup.inlineKeyboard([
+  Markup.button.url('Rest API', baseURL),
+  Markup.button.url('Owner Bot', `https://t.me/${owner[0]}`),
+  Markup.button.url('Trakteer ID', trakteerURL)
+]);
+
+export const styleMessage = (title: string, text: string, step = null) => {
+  const content = text.replaceAll(': •', '').replace(/•/g, '᛭').replace(/: /g, ': ');
+  return (title ? `\r \r \r \r ${interline(title)}\n\n${step ? `${step}\n\n` : ''}${content}\n\n` : `\n\n${bold(content)}`).trim();
+};
+
+export const errorMessage = async (xcoders: Context, message: string, error: any) => {
+  console.error(error);
+  await xcoders.reply(bold(message), { parse_mode: 'Markdown' });
+}
 
 export const serviceMenu = (prefix: string, name: string): string => {
   const listFeatures = requireJson('./output/database/commands.json');
   let position = '';
   let assignFeatures = _.assign(listFeatures);
-  const monospace = (str: string) => '```' + str + '```';
-  const bold = (str: string) => '*' + str + '*';
 
   Object.keys(listFeatures).forEach((item) => {
     position += `\t\t\t ${bold(item.replace(/[^a-zA-Z0-9]/g, ' '))}\n${'_' + style + ' ' + prefix + assignFeatures[item].join('_\n_' + style + ' ' + prefix).replaceAll('< ', '*').replaceAll(' >', '*').replace(':', randomSplit) + '_'}\n\n`;

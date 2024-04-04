@@ -3,6 +3,7 @@ import path from 'path';
 import crypto from 'crypto';
 import { execSync } from 'child_process';
 import { Context } from 'telegraf';
+import { Update } from 'telegraf/types';
 
 import { media } from '../../configs/regex.js';
 import { zipFolder, getBuffer, getJson } from '../../library/functions.js';
@@ -15,7 +16,7 @@ export default {
    query: true,
    url: true,
    usage: '%cmd% url Twitter.',
-   execute: async ({ query, xcoders, m }: { query: string, username: string, xcoders: Context, m: Client }) => {
+   execute: async ({ query, xcoders, m, errorMessage }: { query: string, username: string, xcoders: Context, m: Client, errorMessage: (xcoders: Context<Update>, message: string, error: any) => Promise<void> }) => {
       try {
          if (!media(query)) return xcoders.reply('invalid url Twitter, masukkan url dengan benar...');
          const response = await getJson(`${m.base_url}/api/download/twitter?url=${query}&apikey=${m.api_key}`);
@@ -51,8 +52,7 @@ export default {
             });
          }
       } catch (error: any) {
-         console.error(error);
-         return xcoders.reply('Error download media twitter, silahkan lapor ke owner untuk memperbaiki fitur tersebut...');
+         return errorMessage(xcoders, 'Error download media twitter, silahkan lapor ke owner untuk memperbaiki fitur tersebut...', error);
       }
    }
 };

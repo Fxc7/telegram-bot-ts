@@ -1,4 +1,5 @@
 import { Context } from 'telegraf';
+import { Update } from 'telegraf/types';
 
 import { media } from '../../configs/regex.js';
 import { getBuffer, getJson } from '../../library/functions.js';
@@ -11,7 +12,7 @@ export default {
    query: true,
    url: true,
    usage: '%cmd% url template capcut.',
-   execute: async ({ query, xcoders, m }: { query: string, username: string, xcoders: Context, m: Client }) => {
+   execute: async ({ query, xcoders, m, errorMessage }: { query: string, username: string, xcoders: Context, m: Client, errorMessage: (xcoders: Context<Update>, message: string, error: any) => Promise<void> }) => {
       try {
          if (!media(query)) return xcoders.reply('invalid url Capcut, masukkan url dengan benar...');
          const url = await fetch(query).then((response) => response.url);
@@ -19,8 +20,7 @@ export default {
          await xcoders.reply('Tunggu sebentar...');
          return xcoders.sendVideo({ source: await getBuffer(response.result.url) }, { caption: response.result.title + response.result.description, has_spoiler: true });
       } catch (error: any) {
-         console.error(error);
-         return xcoders.reply('Error download Video capcut, silahkan lapor ke owner untuk memperbaiki fitur tersebut...');
+         return errorMessage(xcoders, 'Error download Video capcut, silahkan lapor ke owner untuk memperbaiki fitur tersebut...', error);
       }
    }
 };
