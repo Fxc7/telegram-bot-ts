@@ -9,11 +9,12 @@ export default {
    command: /^(hd|upscale|remini)$/i,
    description: 'Upscale image to HD',
    usage: '%cmd%',
+   media: true,
+   photo: true,
    execute: async ({ xcoders, m, errorMessage }: { xcoders: Context, m: Client, errorMessage: (xcoders: Context<Update>, message: string, error: any) => Promise<void> }) => {
       try {
-         if (!m.is_media && m.media!.photo) return xcoders.reply('Reply atau kirim photo untuk menggunakan fitur ini.');
          const length = m.media!.photo.length;
-         const fileId = m.media?.photo[length - 1].file_id!;
+         const fileId = m.media!.photo[length - 1].file_id!;
          const fileUrl = await xcoders.telegram.getFileLink(fileId);
          const response = await getJson(`${m.base_url}/api/maker/upscale?url=${fileUrl.toString()}&apikey=${m.api_key}`);
          await xcoders.reply('Tunggu sebentar...');

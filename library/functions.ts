@@ -50,10 +50,17 @@ export const getJson = async (url: string) => {
    }
 };
 
-export const getBuffer = async (url: string): Promise<Buffer> => {
+export const getBuffer = async (url: string, options: { with_fetch?: boolean } = {}): Promise<Buffer> => {
    try {
-      const response = await fetch(url).then((response) => response.arrayBuffer());
-      return convertToBuffer(response);
+      if (options.with_fetch) {
+         const arrayBuffer = await fetch(url, { keepalive: true }).then((response) => response.arrayBuffer());
+         return convertToBuffer(arrayBuffer);
+      } else {
+         const response = await axios.get(url, {
+            responseType: 'arraybuffer'
+         });
+         return response.data;
+      }
    } catch (error) {
       throw error;
    }
@@ -61,10 +68,10 @@ export const getBuffer = async (url: string): Promise<Buffer> => {
 
 export const sendVideo = async (id: number, input: string | Buffer, options: { [key: string]: string | boolean | object | [] } = {}): Promise<void> => {
    try {
-      const readFiles = Buffer.isBuffer(input) ? input : input.startsWith('http') ? await getBuffer(input) : await fs.promises.readFile(input);
+      const readFiles = Buffer.isBuffer(input) ? input : input.startsWith('http') ? await getBuffer(input, { with_fetch: true }) : await fs.promises.readFile(input);
       const files = await fileTypeFromBuffer(readFiles);
       const formData = new FormData();
-      formData.append('chat_id', id);
+      formData.append('chat_id', id.toString());
       for (let keys of Object.keys(options)) formData.append(keys, options[keys].toString());
       formData.append('video', readFiles, { contentType: files?.mime, filename: `${crypto.randomUUID()}.mp4` });
       const response = await axios.post(`https://api.telegram.org/bot${token}/sendVideo`, formData, {
@@ -81,7 +88,7 @@ export const sendVideo = async (id: number, input: string | Buffer, options: { [
 
 export const sendDocument = async (id: number, filePath: string, filename: string, options: { [key: string]: string | boolean | object | [] } = {}): Promise<void> => {
    try {
-      const readFiles = filePath.startsWith('http') ? await getBuffer(filePath) : await fs.promises.readFile(filePath);
+      const readFiles = filePath.startsWith('http') ? await getBuffer(filePath, { with_fetch: true }) : await fs.promises.readFile(filePath);
       const files = await fileTypeFromBuffer(readFiles);
       const formData = new FormData();
       formData.append('chat_id', id);
@@ -103,12 +110,8 @@ export const zipFolder = async (srcFolder: string, zipFilePath: string, callback
    const output = fs.createWriteStream(zipFilePath);
    const archive = archiver('zip', { zlib: { level: 9 } });
 
-   output.on('close', () => {
-      callback();
-   });
-   archive.on('error', (error: any) => {
-      callback(error);
-   });
+   output.on('close', () => callback());
+   archive.on('error', (error: any) => callback(error));
    archive.pipe(output);
    archive.directory(srcFolder, false);
    await archive.finalize();
@@ -123,3 +126,26 @@ export const convertToBuffer = (arrayBuffer: ArrayBuffer): Buffer => {
    }
    return buffer;
 };
+
+export const range = (start: number, stop: number, step: number) => {
+   if (typeof stop == 'undefined') {
+      // one param defined
+      stop = start;
+      start = 0;
+   }
+   if (typeof step == 'undefined') {
+      step = 1;
+   }
+   if ((step > 0 && start >= stop) || (step < 0 && start <= stop)) {
+      return [];
+   }
+   let result = [];
+   for (let i = start; step > 0 ? i < stop : i > stop; i += step) {
+      result.push(i);
+   }
+   return result;
+};
+
+export const parseMarkdown = (text: string) => {
+   return text.replace(/(\[[^\][]*]\(http[^()]*\))|[_*[\]()~>#+=|{}.!-]/gi, (x: string, y: any) => y ? y : '\\' + x);
+}

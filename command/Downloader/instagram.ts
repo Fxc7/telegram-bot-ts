@@ -22,7 +22,7 @@ export default {
          if (!media(query)) return xcoders.reply('invalid url Instagram, masukkan url dengan benar...');
          const response = await getJson(`${m.base_url}/api/download/instagram?url=${query}&apikey=${m.api_key}`);
          await xcoders.reply('Tunggu sebentar...');
-         if (typeof response.result!.url === 'string') {
+         if (typeof response.result?.url === 'string') {
             const buffer = await getBuffer(response.result.url);
             const type = await fileTypeFromBuffer(buffer);
             if (/video/.test(type?.mime!)) return xcoders.sendVideo({ source: buffer }, { caption: 'Successfully download video', has_spoiler: true });

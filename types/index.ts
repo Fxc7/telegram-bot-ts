@@ -1,10 +1,11 @@
+import { Context } from 'telegraf';
 import Message from 'telegraf/types';
 
 export interface Client {
    id: number;
    message_id: number;
-   language_code: string | null | undefined;
-   type: string | null | undefined;
+   language_code: string | undefined;
+   type: string | undefined;
    type_message: string | null | undefined;
    username: string | null | undefined;
    first_name: string | null | undefined;
@@ -27,3 +28,25 @@ export interface Client {
    api_key: string;
    prefix: string;
 };
+
+export enum GenStages {
+   INPUT_TEXT = 'inputText',
+   SELECT_STYLE = 'selectStyle'
+}
+
+export enum Styles {
+   UHD = 'Detail Foto',
+   ANIME = 'Anime',
+   DEFAULT = 'Defualt'
+}
+
+export interface ContextWithSession extends Context {
+   session?: SessionData
+}
+
+export interface SessionData {
+   currentGenStage: GenStages;
+   dataGenStage?: Partial<Record<GenStages, string>>;
+}
+
+export type Callback = (xcoders: ContextWithSession) => void;

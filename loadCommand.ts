@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 import { requireJson, reloadModule } from './library/functions.js';
-import { savedPlugins } from './library/service.js';
+import { savedPlugins } from './middleware/service.js';
 
 export default async (cache: { headersCommands: any; allCommands?: any; plugins?: any; Commands?: { [x: string]: string | any[]; }; commander?: { [x: string]: string | any[]; }; }) => {
    const commandsPath = './output/command';

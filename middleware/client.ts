@@ -6,14 +6,14 @@ import { Client } from '../types/index.js';
 
 export default (xcoders: NarrowedContext<Context<Update>, Update.MessageUpdate<Message>>) => {
    const client = {} as Client;
-   const message = Object.keys(xcoders.message).includes('reply_to_message') ? Object.keys((xcoders.message as Message.CommonMessage).reply_to_message!) : Object.keys(xcoders.message);
-   const quoted = (xcoders.message as Message.CommonMessage)!.reply_to_message;
+   const quoted = xcoders.message.hasOwnProperty('reply_to_message') ? (xcoders.message as Message.CommonMessage).reply_to_message : null;
+   const message = quoted ? Object.keys((xcoders.message as Message.CommonMessage).reply_to_message!) : Object.keys(xcoders.message);
    client.message_id = xcoders.message.message_id;
    client.language_code = xcoders.message.from.language_code;
    client.id = xcoders.msg.chat.id;
    client.type = xcoders.msg.chat.type;
-   client.username = xcoders.from?.username;
-   client.first_name = (xcoders.from?.first_name + ' ' + xcoders.from.last_name || '').replace('undefined', '').trim();
+   client.username = xcoders.from!.username;
+   client.first_name = (xcoders.from!.first_name + ' ' + xcoders.from.last_name || '').replace('undefined', '').trim();
    client.type_message = message.includes('video') ? 'video' : message.includes('photo') ? 'photo' : message.includes('audio') ? 'audio' : message.includes('voice') ? 'voice' : 'text';
    client.date = xcoders.message.date;
 

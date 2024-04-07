@@ -9,7 +9,9 @@
     "strict": true,
     "outDir": "./output"
   },
-  "files": ["types/global.d.ts"],
+  "files": [
+    "types/global.d.ts"
+  ],
   "include": [
     "*.ts",
     "callback/**/*.ts",
@@ -17,8 +19,10 @@
     "configs/**/*.ts",
     "database/**/*.json",
     "library/**/*.ts",
-    "types/**/*.d.ts"
-  ],
+    "types/**/*.d.ts",
+    "middleware/service.ts",
+    "middleware/client.ts"
+, "middleware/inputText.ts"  ],
   "exclude": [
     "node_modules"
   ]
