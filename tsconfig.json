@@ -20,9 +20,8 @@
     "database/**/*.json",
     "library/**/*.ts",
     "types/**/*.d.ts",
-    "middleware/service.ts",
-    "middleware/client.ts"
-, "middleware/inputText.ts"  ],
+    "middleware/**/*.ts"
+  ],
   "exclude": [
     "node_modules"
   ]

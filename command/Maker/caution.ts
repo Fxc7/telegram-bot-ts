@@ -1,8 +1,6 @@
-import { Context } from 'telegraf';
-import { Update } from 'telegraf/types';
-
 import { getBuffer } from '../../library/functions.js';
-import { Client } from '../../types/index.js';
+import { errorMessage, waitingMessage } from '../../middleware/service.js';
+import { Execute } from '../../types/index.js';
 
 export default {
    show: ['caution'],
@@ -10,13 +8,13 @@ export default {
    description: 'Generate Caution text',
    query: true,
    usage: '%cmd% xcoders',
-   execute: async ({ xcoders, m, query, errorMessage }: { query: string, xcoders: Context, m: Client, errorMessage: (xcoders: Context<Update>, message: string, error: any) => Promise<void> }) => {
+   execute: async ({ xcoders, m, query, languages }: Execute) => {
       try {
-         const response = await getBuffer(`${m.base_url}/api/maker/caution?text=${query}&apikey=${m.api_key}`);
-         await xcoders.reply('Tunggu sebentar...');
-         return xcoders.telegram.sendPhoto(m.id, { source: response }, { caption: 'Caution Successfully' });
+         const response = await getBuffer(`${m!.base_url}/api/maker/caution?text=${query}&apikey=${m.api_key}`);
+         await waitingMessage(xcoders, 'upload_photo', languages.waiting_message);
+         return xcoders.sendPhoto({ source: response }, { caption: '_Caution Successfully..._', parse_mode: 'Markdown' });
       } catch (error) {
-         return errorMessage(xcoders, 'Error create Caution photo, hubungi owner untuk memperbaiki fitur ini...', error);
+         return errorMessage(xcoders, languages.error_message.replace('%%', 'Error Caution photo'), error);
       }
    }
 };

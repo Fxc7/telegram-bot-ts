@@ -1,5 +1,6 @@
-import { Context } from 'telegraf';
-import Message from 'telegraf/types';
+import { Context, NarrowedContext, Scenes } from 'telegraf';
+import { WizardSessionData } from 'telegraf/scenes';
+import Message, { Update, CallbackQuery } from 'telegraf/types';
 
 export interface Client {
    id: number;
@@ -17,8 +18,10 @@ export interface Client {
       video: Message.Video,
       photo: Message.PhotoSize[],
       voice: Message.Voice,
-      audio: Message.Audio
-    } | null;
+      audio: Message.Audio,
+      sticker: Message.Sticker,
+      document: Message.Document
+   } | null;
    quoted: {
       type?: string | null;
       quoted_media_message?: Message.Video | Message.PhotoSize | Message.Voice | Message.Audio | null;
@@ -29,24 +32,60 @@ export interface Client {
    prefix: string;
 };
 
-export enum GenStages {
-   INPUT_TEXT = 'inputText',
-   SELECT_STYLE = 'selectStyle'
-}
+export interface Languages {
+   command: Command;
+   notes: string[];
+   start_service: string;
+   waiting_message: string;
+   error_message: string;
+};
 
-export enum Styles {
-   UHD = 'Detail Foto',
-   ANIME = 'Anime',
-   DEFAULT = 'Defualt'
-}
+export interface Command {
+   group_only_features: string;
+   media_features: string;
+   media_photo_features: string;
+   media_video_features: string;
+   owner_features: string;
+   private_features: string;
+   text_features: string;
+   url_audio_features: string;
+   url_features: string;
+   url_image_features: string;
+   url_video_features: string;
+};
 
-export interface ContextWithSession extends Context {
-   session?: SessionData
-}
+export interface Execute {
+   query: string;
+   command: string;
+   xcoders: Context;
+   m: Client;
+   languages: Languages;
+};
 
-export interface SessionData {
-   currentGenStage: GenStages;
-   dataGenStage?: Partial<Record<GenStages, string>>;
-}
+interface State {
+   name: string;
+   location: string,
+   media: {
+      type: string;
+      media: string;
+   }[],
+   biography: string | undefined;
+   instagram: string;
+   gender: string;
+};
 
-export type Callback = (xcoders: ContextWithSession) => void;
+export interface MiddlewareClient extends NarrowedContext<Context<Update>, Update.MessageUpdate<Message.Message>> { }
+
+export interface MyContext extends Context {
+   session: Scenes.WizardSession;
+   scene: Scenes.SceneContextScene<MyContext, WizardSessionData>;
+   wizard: Scenes.WizardContextWizard<MyContext> & {
+      state: State;
+   };
+};
+
+export declare namespace callbackQuery {
+   interface DataQuery extends CallbackQuery.DataQuery { }
+   interface AbstractQuery extends CallbackQuery.AbstractQuery { }
+   interface GameQuery extends CallbackQuery.GameQuery { }
+};

@@ -8,12 +8,19 @@ import { fileTypeFromBuffer } from 'file-type';
 import FormData from 'form-data';
 
 import { token } from '../configs/env.js';
+import { Languages } from '../types/index.js';
 
 export const requireJson = (pathFiles: string) => {
    if (!fs.existsSync(pathFiles)) throw 'files not exists.';
    const readFiles = fs.readFileSync(pathFiles, 'utf-8');
    const parseFiles = JSON.parse(readFiles);
    return parseFiles;
+};
+
+export const getLanguages = (code: string): Languages => {
+   const languages = requireJson(`./language/${code}.json`);
+   if (languages) return languages;
+   return requireJson('./language/en.json');
 };
 
 export const reloadModule = (modulePath: string): void => {
@@ -127,9 +134,8 @@ export const convertToBuffer = (arrayBuffer: ArrayBuffer): Buffer => {
    return buffer;
 };
 
-export const range = (start: number, stop: number, step: number) => {
+export const range = (start: number, stop: number, step: number): any[] => {
    if (typeof stop == 'undefined') {
-      // one param defined
       stop = start;
       start = 0;
    }
@@ -146,6 +152,6 @@ export const range = (start: number, stop: number, step: number) => {
    return result;
 };
 
-export const parseMarkdown = (text: string) => {
+export const parseMarkdown = (text: string): string => {
    return text.replace(/(\[[^\][]*]\(http[^()]*\))|[_*[\]()~>#+=|{}.!-]/gi, (x: string, y: any) => y ? y : '\\' + x);
 }

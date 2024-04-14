@@ -1,0 +1,21 @@
+{
+   "command": {
+      "group_only_features": "Fitur %% hanya bisa digunakan didalam group",
+      "media_features": "_Reply atau kirim media photo atau video dengan caption %%_",
+      "media_photo_features": "_Reply atau kirim media photo dengan caption %%_",
+      "media_video_features": "_Reply atau kirim media video dengan caption %%_",
+      "owner_features": "_Fitur ini khusus untuk owner..._",
+      "private_features": "_Private Fitur, Tunggu owner memperbaiki fitur ini..._",
+      "text_features": "_Query yang dibutuhkan command %% adalah sebuah teks..._",
+      "url_audio_features": "_Query yang dibutuhkan adalah URL audio yang valid._",
+      "url_features": "_Query yang dibutuhkan command %% adalah sebuah url..._",
+      "url_image_features": "_Query yang dibutuhkan adalah URL image yang valid._",
+      "url_video_features": "_Query yang dibutuhkan adalah URL video yang valid._"
+   },
+   "notes": [
+      "Jangan spam bot"
+   ],
+   "start_service": "Saya adalah bot multi fungsi yang dibuat dengan ❤️ oleh xcoders teams\n\n_Silakan ketik /help untuk memulai menu bot_",
+   "waiting_message": "_tunggu sebentar..._",
+   "error_message": "_%%, silahkan lapor ke owner untuk memperbaiki fitur tersebut..._"
+}

@@ -1,5 +1,5 @@
 import { Markup, Context } from 'telegraf';
-import { InlineKeyboardMarkup } from 'telegraf/types';
+import { ChatAction, InlineKeyboardMarkup } from 'telegraf/types';
 import _ from 'lodash';
 import moment from 'moment-timezone';
 import chalk from 'chalk';
@@ -13,7 +13,38 @@ const style = '⭑';
 const randomSplit = _.sample(['/', 'or']);
 const monospace = (str: string) => '```' + str + '```';
 const interline = (str: string) => '_' + str + '_';
-const bold = (str: string) => '*' + str + '*';
+
+const ESCAPE_MAP = new Set(["_", "*", "[", "]", "(", ")", "~", "`", ">", "<", "#", "+", "-", "=", "|", "{", "}", ".", "!"])
+export const escapeHTML = (text: string) => {
+  return [...text].map((char) => {
+    if (ESCAPE_MAP.has(char)) return `\\${char}`;
+    return char;
+  }).join("");
+}
+
+const CODE_ESCAPE_MAP = new Map([
+  ["`", "\\`"],
+  ["\\", "\\\\"],
+  ["<", "&lt;"],
+  [">", "&gt;"],
+  ["&", "&amp;"]
+])
+export const escapeCode = (text: string) => {
+  return [...text].map((char) => {
+    if (CODE_ESCAPE_MAP.has(char)) return CODE_ESCAPE_MAP.get(char);
+    return char;
+  }).join("");
+};
+
+export const bold = (text: string) => `<b>${text}</b>`;
+export const italic = (text: string) => `<i>${text}</i>`;
+export const code = (text: string) => `<code>${escapeCode(text)}</code>`;
+export const pre = (text: string) => `<pre>${escapeCode(text)}</pre>`;
+export const underline = (text: string) => `<u>${text}</u>`;
+export const strikethrough = (text: string) => `<s>${text}</s>`;
+export const link = (text: string, url: string) => `<a href="${url}">${text}</a>`;
+export const quote = (text: string) => `<blockquote>${text}</blockquote>`;
+export const mention = (text: string, user_id: number) => `<a href="tg://user?id=${user_id}">${text}</a>`;
 
 export const buttonStart = Markup.inlineKeyboard([
   Markup.button.url('Rest API', baseURL),
@@ -26,9 +57,9 @@ export const buttonHelp = (id: number, cache: any, command: string = ''): Inline
   for (let category of Object.keys(cache.Commands)) {
     if (command !== category) result.push(Markup.button.callback(category, category + '-' + id.toString()));
   }
-  if (command !== 'All') result.push(Markup.button.callback('All Menu', 'All'));
+  if (command !== 'All') result.push(Markup.button.callback('All Menu', 'All' + '-' + id.toString()));
 
-  return Markup.inlineKeyboard(result).reply_markup;
+  return Markup.inlineKeyboard(result, { columns: 2 }).reply_markup;
 };
 
 export const replyWithFormatText = async (text: string): Promise<string> => {
@@ -41,41 +72,48 @@ export const replyWithFormatText = async (text: string): Promise<string> => {
 
 export const styleMessage = (title: string, text: string, step = null): string => {
   const content = text.replaceAll(': •', '').replace(/•/g, '᛭').replace(/: /g, ': ');
-  return (title ? `\r \r \r \r ${interline(title)}\n\n${step ? `${step}\n\n` : ''}${content}\n\n` : `\n\n${bold(content)}`).trim();
+  return (title ? `\r \r \r \r ${interline(title)}\n\n${step ? `${step}\n\n` : ''}${content}\n\n` : `\n\n*${content}*`).trim();
 };
+
+export const waitingMessage = async (xcoders: Context, action: ChatAction, message: string) => {
+  await xcoders.sendChatAction(action);
+  await xcoders.reply(message, { parse_mode: 'Markdown' });
+}
 
 export const errorMessage = async (xcoders: Context, message: string, error: any): Promise<void> => {
   logger.error(error);
-  await xcoders.reply(bold(message), { parse_mode: 'Markdown' });
+  await xcoders.reply(`*${message}*`, { parse_mode: 'Markdown' });
 };
 
-export const startService = (name: string): string => {
-  return `Hello ${name.replaceAll('_', ' ')}! Im a multi function bot build with ❤️ by xcoders teams\n\n_Please type /help to start the bot menu_`;
-}
+export const start_service = (name: string, text: string): string => {
+  return `Hello ${name?.replaceAll('_', ' ')}! ${text}`;
+};
 
-export const helpService = (prefix: string, name: string): string => {
+export const helpService = (prefix: string, name: string, language: any): string => {
   const listFeatures = requireJson('./output/database/commands.json');
   let position = '';
   let assignFeatures = _.assign(listFeatures);
+  const notes = language.notes.map((str: string) => `⧾ ${str}`).join('\n  ');
 
   Object.keys(listFeatures).forEach((item) => {
-    position += `\t\t\t ${bold(item.replace(/[^a-zA-Z0-9]/g, ' '))}\n${'_' + style + ' ' + prefix + assignFeatures[item].join('_\n_' + style + ' ' + prefix).replaceAll('< ', '*').replaceAll(' >', '*').replace(':', randomSplit) + '_'}\n\n`;
+    position += `\t\t\t *${item.replace(/[^a-zA-Z0-9]/g, ' ')}*\n${'_' + style + ' ' + prefix + assignFeatures[item].join('_\n_' + style + ' ' + prefix).replaceAll('< ', '*').replaceAll(' >', '*').replace(':', randomSplit) + '_'}\n\n`;
   });
   return `
-  *${`Hallo ${name.toString().replaceAll('_', ' ')}`}* 👋
+  *${`Hallo ${name?.toString().replaceAll('_', ' ')}`}* 👋
 
 ⬟ Date: ${moment().tz('Asia/Jakarta').locale('id').format('LLL')}
 
 ⬟ Notes:
-  ${'⧾ ' + 'Jangan spam bot'}
+  ${notes}
 
 ${position}
 \t\t*_build with ❤️ by xcoders teams_*`.replaceAll('.', ':');
 };
 
-export const displayMenuFromCallback = (prefix: string, name: string, listFeatures: { [key: string]: string | Array<string> }): string => {
+export const displayMenuFromCallback = (prefix: string, name: string, listFeatures: { [key: string]: string | Array<string> }, language: any): string => {
   let position = '';
   let assignFeatures = _.assign(listFeatures);
+  const notes = language.notes.map((str: string) => `⧾ ${str}`).join('\n  ');
 
   Object.keys(listFeatures).forEach((item) => {
     let features = Array.isArray(assignFeatures[item]) ? assignFeatures[item] : [assignFeatures[item]];
@@ -84,12 +122,12 @@ export const displayMenuFromCallback = (prefix: string, name: string, listFeatur
   });
 
   return `
-  *${`Hallo ${name.toString().replaceAll('_', ' ')}`}* 👋
+  *${`Hallo ${name?.toString().replaceAll('_', ' ')}`}* 👋
 
 ⬟ Date: ${moment().tz('Asia/Jakarta').locale('id').format('LLL')}
 
 ⬟ Notes:
-  ${'⧾ ' + 'Jangan spam bot'}
+  ${notes}
 
 ${position}
 

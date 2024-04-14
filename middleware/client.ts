@@ -12,7 +12,7 @@ export default (xcoders: NarrowedContext<Context<Update>, Update.MessageUpdate<M
    client.language_code = xcoders.message.from.language_code;
    client.id = xcoders.msg.chat.id;
    client.type = xcoders.msg.chat.type;
-   client.username = xcoders.from!.username;
+   client.username = xcoders.from!.username || 'unknown';
    client.first_name = (xcoders.from!.first_name + ' ' + xcoders.from.last_name || '').replace('undefined', '').trim();
    client.type_message = message.includes('video') ? 'video' : message.includes('photo') ? 'photo' : message.includes('audio') ? 'audio' : message.includes('voice') ? 'voice' : 'text';
    client.date = xcoders.message.date;
@@ -24,7 +24,9 @@ export default (xcoders: NarrowedContext<Context<Update>, Update.MessageUpdate<M
       video: ((quoted || xcoders.message) as Message.VideoMessage)!.video,
       photo: ((quoted || xcoders.message) as Message.PhotoMessage)!.photo,
       audio: ((quoted || xcoders.message) as Message.AudioMessage)!.audio,
-      voice: ((quoted || xcoders.message) as Message.VoiceMessage)!.voice
+      voice: ((quoted || xcoders.message) as Message.VoiceMessage)!.voice,
+      sticker: ((quoted || xcoders.message) as Message.StickerMessage)!.sticker,
+      document: ((quoted || xcoders.message) as Message.DocumentMessage)!.document,
    } : null;
    client.quoted = {
       type: client.type_message!,

@@ -1,0 +1,21 @@
+{
+   "command": {
+      "group_only_features": "The %% feature can only be used in groups",
+      "media_features": "_Reply or send media photo or video with caption %%_",
+      "media_photo_features": "_Reply or send media photo with caption %%_",
+      "media_video_features": "_Reply or send video media with caption %%_",
+      "owner_features": "_This feature is exclusively for owners..._",
+      "private_features": "_Private Features, Waiting for the owner to fix this feature..._",
+      "text_features": "_Query required by command %% is a text..._",
+      "url_audio_features": "_Query required is a valid audio URL._",
+      "url_features": "_Query required command %% is a url..._",
+      "url_image_features": "_Query required is a valid image URL._",
+      "url_video_features": "_The required query is a valid video URL._"
+   },
+   "notes": [
+      "Don't spam the bot"
+   ],
+   "start_service": "I am a multi-functional bot created with ❤️ by the xcoders teams\n\n_Please type /help to start the bot menu_",
+   "waiting_message": "_wait a minute..._",
+   "error_message": "_%%, please report to the owner to fix the feature..._"
+}

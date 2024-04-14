@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
+import logger from './library/logger.js';
 import { requireJson, reloadModule } from './library/functions.js';
 import { savedPlugins } from './middleware/service.js';
 
@@ -26,7 +27,7 @@ export default async (cache: { headersCommands: any; allCommands?: any; plugins?
                   cache.plugins[`${plugin}-${filename}`] = command;
                }
             } catch (error: any) {
-               console.error(error);
+               logger.error(error);
                reloadModule(pathFiles);
             }
          }

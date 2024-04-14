@@ -1,8 +1,6 @@
-import { Context } from 'telegraf';
-import { Update } from 'telegraf/types';
-
 import { getBuffer } from '../../library/functions.js';
-import { Client } from '../../types/index.js';
+import { Execute } from '../../types/index.js';
+import { errorMessage, waitingMessage } from '../../middleware/service.js';
 
 export default {
    show: ['drake'],
@@ -10,14 +8,14 @@ export default {
    description: 'Generate drake meme text',
    query: true,
    usage: '%cmd% tes1|tes2',
-   execute: async ({ xcoders, m, query, errorMessage }: { query: string, xcoders: Context, m: Client, errorMessage: (xcoders: Context<Update>, message: string, error: any) => Promise<void> }) => {
+   execute: async ({ xcoders, m, query, languages }: Execute) => {
       try {
          const [text, text2] = query.split('|');
          const response = await getBuffer(`${m.base_url}/api/maker/drake?text=${text}&text2=${text2}&apikey=${m.api_key}`);
-         await xcoders.reply('Tunggu sebentar...');
-         return xcoders.telegram.sendPhoto(m.id, { source: response }, { caption: 'Drake MEME Successfully' });
+         await waitingMessage(xcoders, 'upload_photo', languages.waiting_message);
+         return xcoders.sendPhoto({ source: response }, { caption: '_Drake MEME Successfully..._', parse_mode: 'Markdown' });
       } catch (error) {
-         return errorMessage(xcoders, 'Error Create image drake meme, hubungi owner untuk memperbaiki fitur ini...', error);
+         return errorMessage(xcoders, languages.error_message.replace('%%', 'Error Create image drake meme'), error);
       }
    }
 };
